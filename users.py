@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
-# Manage users
-# Bioinfo-fr planning
+"""Bioinfo-fr Planning.
 
+Usage:
+  user.py <start> <end> [--path=<path>]
+  user.py (-h | --help)
+  user.py --version
+
+Options:
+  --path=<path>    Path of the user file [default: users.csv].
+  -h --help        Show this screen.
+  --version        Show version.
+
+Description:
+    <start>        The start date (yyyy,mm,dd)
+    <end>          The end date (yyyy,mm,dd)
+"""
+from docopt import docopt
 import csv
 import os
 import datetime
 import random
 from collections import deque
 
-# the file referencing the users
-users_file = '%s.csv' % os.path.splitext(__file__)[0]
 
 display_date = lambda x: datetime.datetime.strftime(x, '%A %d %B %Y')
 
@@ -31,7 +43,6 @@ def get(users, key, values):
     e.g:
     >>>     users = load(users_file)
     >>>     print get(users, 'firstname', 'yohan')
-    >>>     print get(users, 'status', '-')
     >>>     print get(users, 'role', ['admin', 'auteur'])
     """
     if isinstance(values, str):
@@ -40,16 +51,16 @@ def get(users, key, values):
     return [u for u in users for v in values if v in u[key.upper()].lower().split('|')]
 
 
-def calendar(start=(2013, 10, 1), end=(2013, 12, 21)):
+def calendar(start, end):
     """
     Start the next monday.
     """
-    start = datetime.date(*start) + datetime.timedelta(7 - datetime.date(*start).weekday())
-    end = datetime.date(*end) + datetime.timedelta(7 - datetime.date(*end).weekday())
+    start += datetime.timedelta(7 - start.weekday())
+    end += datetime.timedelta(7 - end.weekday())
 
     def _next(start, end):
         """
-        Generate tthe days
+        Generate the days
         """
         while start < end:
             start += datetime.timedelta(days=7)
@@ -61,12 +72,14 @@ def calendar(start=(2013, 10, 1), end=(2013, 12, 21)):
 
 
 def _pick_authors(authors):
-    store = list(authors)
+    shuffled_authors = list(authors)
+    random.shuffle(shuffled_authors)
+    store = list(shuffled_authors)
     while True:
         try:
             yield store.pop()
         except IndexError:
-            store = list(authors)
+            store = list(shuffled_authors)
             yield store.pop()
 
 
@@ -81,8 +94,8 @@ def _pick_reviewer(reviewers):
         yield random.sample(reviewers, 1)[0]
 
 
-def main(start=(2013, 04, 25), end=(2013, 11, 01)):
-    users = load(users_file)
+def main(path, start, end):
+    users = load(path)
 
     admins = get(users, 'role', 'admin')
     authors = get(users, 'role', 'auteur')
@@ -109,5 +122,9 @@ def main(start=(2013, 04, 25), end=(2013, 11, 01)):
         yield day, auth, revs
 
 if __name__ == '__main__':
-    for d, a, r in main():
-        print '%s :: %s :: %s' % (d, a, ' - '.join((x for x in r)))
+    args = docopt(__doc__, version='Planning 2.0')
+    start = datetime.datetime.strptime(args['<start>'], "%Y,%m,%d")
+    end = datetime.datetime.strptime(args['<end>'], "%Y,%m,%d")
+    path = args['--path']
+    for day, author, reviewers in main(path, start, end):
+        print '%s :: %s :: %s' % (day, author, ' - '.join((x for x in reviewers)))
