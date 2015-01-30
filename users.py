@@ -8,7 +8,7 @@ import datetime
 import random
 from collections import deque
 
-# the file referencing the user
+# the file referencing the users
 users_file = '%s.csv' % os.path.splitext(__file__)[0]
 
 display_date = lambda x: datetime.datetime.strftime(x, '%A %d %B %Y')
