@@ -1,26 +1,35 @@
 # -*- coding: utf-8 -*-
-"""Bioinfo-fr Planning.
-
-Usage:
-  user.py <start> <end> [--path=<path>]
-  user.py (-h | --help)
-  user.py --version
-
-Options:
-  --path=<path>    Path of the user file [default: users.csv].
-  -h --help        Show this screen.
-  --version        Show version.
-
-Description:
-    <start>        The start date (yyyy,mm,dd)
-    <end>          The end date (yyyy,mm,dd)
-"""
 from docopt import docopt
 import csv
 import os
 import datetime
 import random
 from collections import deque
+
+
+today =  datetime.datetime.today()
+later = today + datetime.timedelta(weeks=30)
+
+INPUT_DATE_FORMAT = "%Y,%m,%d"
+
+__doc__ = """Bioinfo-fr Planning.
+
+Usage:
+  user.py [--start=<start>] [--end=<end>] [--path=<path>]
+  user.py (-h | --help)
+  user.py --version
+
+Options:
+  --path=<path>    Path of the user file [default: {fname}].
+  --start=<start>  Start of the calendar [default: {start}].
+  --end=<end>     End of the calendar [default: {end}].
+  -h --help        Show this screen.
+  --version        Show version.
+
+Description:
+    <start>        The start date (yyyy,mm,dd)
+    <end>          The end date (yyyy,mm,dd)
+""".format(start=today.strftime(INPUT_DATE_FORMAT), end=later.strftime(INPUT_DATE_FORMAT), fname='users.csv')
 
 
 display_date = lambda x: datetime.datetime.strftime(x, '%A %d %B %Y')
@@ -123,8 +132,8 @@ def main(path, start, end):
 
 if __name__ == '__main__':
     args = docopt(__doc__, version='Planning 2.0')
-    start = datetime.datetime.strptime(args['<start>'], "%Y,%m,%d")
-    end = datetime.datetime.strptime(args['<end>'], "%Y,%m,%d")
+    start = datetime.datetime.strptime(args['--start'], "%Y,%m,%d")
+    end = datetime.datetime.strptime(args['--end'], "%Y,%m,%d")
     path = args['--path']
     for day, author, reviewers in main(path, start, end):
         print '%s :: %s :: %s' % (day, author, ' - '.join((x for x in reviewers)))
