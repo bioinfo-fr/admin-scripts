@@ -104,8 +104,13 @@ def _pick_reviewer(reviewers):
 
 
 def main(path, start, end):
+    # load CSV files containing user list with roles
+    # a line with headers could be:
+    # PSEUDO,FIRSTNAME LASTNAME,MAIL,ROLE
+    # jdoe,John Doe,johndoe@email.com,contributeur|relecteur
     users = load(path)
 
+    # get user by roles
     admins = get(users, 'role', 'admin')
     authors = get(users, 'role', 'auteur')
     reviewers_only = [i for i in get(users, 'role', 'relecteur') if i not in authors]
