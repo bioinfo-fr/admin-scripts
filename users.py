@@ -115,9 +115,12 @@ def main(path, start, end):
     authors = get(users, 'role', 'auteur')
     reviewers_only = [i for i in get(users, 'role', 'relecteur') if i not in authors]
 
+    # make generator that shuffle the list in input and pick one user (using pop()).
+    # Reinitialize itself when list is empty
     author_picker = _pick_authors(authors)
     reviewers_picker = _pick_reviewer(_make_reviewer_list(admins, authors, reviewers_only))
 
+    # contains the current selection
     current_authors = deque([], 6)
     current_reviewer = deque([], 3 * 3)
 
