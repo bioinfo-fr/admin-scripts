@@ -40,7 +40,7 @@ def load(path):
     Load users from csv file.
     """
     users = []
-    with open(path, 'rb') as infile:
+    with open(path, 'r') as infile:
         reader = csv.DictReader(infile, delimiter=',', quoting=csv.QUOTE_NONE)
         users = [r for r in reader]
     return users
@@ -125,14 +125,14 @@ def main(path, start, end):
     current_reviewer = deque([], 3 * 3)
 
     for day in calendar(start, end):
-        auth = author_picker.next()['PSEUDO']
+        auth = next(author_picker)['PSEUDO']
         current_authors.append(auth)
 
         revs = []
-        for i in xrange(3):
-            rev = reviewers_picker.next()['PSEUDO']
+        for i in range(3):
+            rev = next(reviewers_picker)['PSEUDO']
             while rev in current_authors or rev in current_reviewer or rev in revs:
-                rev = reviewers_picker.next()['PSEUDO']
+                rev = next(reviewers_picker)['PSEUDO']
             revs.append(rev)
             current_reviewer.append(rev)
 
@@ -144,4 +144,4 @@ if __name__ == '__main__':
     end = datetime.datetime.strptime(args['--end'], "%Y,%m,%d")
     path = args['--path']
     for day, author, reviewers in main(path, start, end):
-        print '%s :: %s :: %s' % (day, author, ' - '.join((x for x in reviewers)))
+        print('%s :: %s :: %s' % (day, author, ' - '.join((x for x in reviewers))))
