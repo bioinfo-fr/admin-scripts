@@ -14,6 +14,9 @@ INPUT_DATE_FORMAT = "%Y,%m,%d"
 
 __doc__ = """Bioinfo-fr Planning.
 
+First line of the CSV file should contains the following headers:
+PSEUDO,FIRSTNAME LASTNAME,MAIL,ROLE
+
 Usage:
   user.py [--start=<start>] [--end=<end>] [--path=<path>]
   user.py (-h | --help)
@@ -100,7 +103,14 @@ def _make_reviewer_list(admins, authors, reviewers_only):
 
 def _pick_reviewer(reviewers):
     while True:
-        yield random.sample(reviewers, 1)[0]
+        x = random.choice(reviewers)
+        reviewers.remove(x)
+        yield x
+
+
+def _new_reviewer_picker(admins, authors, reviewers_only):
+    return _pick_reviewer(_make_reviewer_list(admins, authors, reviewers_only))
+
 
 
 def main(path, start, end):
@@ -118,16 +128,15 @@ def main(path, start, end):
     # make generator that shuffle the list in input and pick one user (using pop()).
     # Reinitialize itself when list is empty
     author_picker = _pick_authors(authors)
-    reviewers_picker = _pick_reviewer(_make_reviewer_list(admins, authors, reviewers_only))
 
     # contains the current selection
-    current_authors = deque([], 6)
+    current_authors = deque([], 4)
     current_reviewer = deque([], 3 * 3)
 
     for day in calendar(start, end):
+        reviewers_picker = _new_reviewer_picker(admins, authors, reviewers_only)
         auth = next(author_picker)['PSEUDO']
         current_authors.append(auth)
-
         revs = []
         for i in range(3):
             rev = next(reviewers_picker)['PSEUDO']
